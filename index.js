@@ -20,6 +20,8 @@ readline.on('line', (line) => {
 
     function findLand(arr) {
 
+        let delItem
+
         let stackA = []; // Два стека для обработки и поиска связанных узлов в двумерном массиве
         let stackB = [];
 
@@ -64,9 +66,10 @@ readline.on('line', (line) => {
             for (let col = 0; col < cols; col++) {
                 if (!arr[row][col] || arr[row][col] === ":)") continue;
                 if (arr[row][col] === "1") {
-                    stackA.push([row, col]);
-                    while (stackA.length){
-                        stackA.forEach( (v, i, a) => {
+                    console.log(`первый эл`, row, col)
+                    stackB.push([row, col]);
+                    while (stackB.length){
+                        stackB.forEach( (v, i, a) => {
                             tempX.push(v[0]);
                             tempY.push(v[1]);
 
@@ -82,56 +85,80 @@ readline.on('line', (line) => {
                             bottomLeft = v[0] < rows-1 && v[1] > 0 && arr[v[0] + 1][v[1] - 1] === "1";
                             bottomRight = v[0] < rows-1 && v[1] < cols-1 && arr[v[0] + 1][v[1] + 1] === "1";
 
+                            console.log(`v`, v)
+                            //if (v === ":)") return;
+
                             // узел прервался - выходим
                             if (!left && !right && !up && !bottom && !upLeft && !upRight && !bottomLeft && !bottomRight){
                                 arr[v[0]][v[1]] = ":)";
-                                a.splice(i, 0);
+                                delItem = a.splice(i, 1);
+                                console.log(`delItem`,delItem)
+                                console.log(`stackB`,stackB)
                                 return;
                             }
                             // поиск дочерних узлов
                             if (left){
-                                arr[v[0]][v[1] - 1] = ":)";
-                                stackB.push([v[0], v[1] - 1]);
+                                //arr[v[0]][v[1] - 1] = ":)";
+                                if (!a.includes([v[0], v[1] - 1])){
+                                    stackB.push([v[0], v[1] - 1]);
+                                    console.log("лево")
+                                } else console.log("уже содержит лево")
                             }
                             if (right){
-                                arr[v[0]][v[1] + 1] = ":)";
-                                stackB.push([v[0], v[1] + 1]);
+                                //arr[v[0]][v[1] + 1] = ":)";
+                                if (!a.includes([v[0], v[1] + 1])){
+                                    stackB.push([v[0], v[1] + 1]);
+                                    console.log("право")
+                                } else console.log("уже содержит право")
                             }
 
                             if (up){
-                                arr[v[0] - 1][v[1]] = ":)";
+                                //arr[v[0] - 1][v[1]] = ":)";
                                 stackB.push([v[0] - 1, v[1]]);
+                                console.log("верх")
                             }
                             if (bottom){
-                                arr[v[0] + 1][v[1]] = ":)";
-                                stackB.push([v[0] + 1, v[1]]);
+                                //arr[v[0] + 1][v[1]] = ":)";
+                                if (!a.includes([v[0] + 1, v[1]])){
+                                    stackB.push([v[0] + 1, v[1]]);
+                                    console.log("низ")
+                                } else console.log("уже содержит низ")
                             }
 
                             if (upLeft){
-                                arr[v[0] - 1][v[1] - 1] = ":)";
+                                //arr[v[0] - 1][v[1] - 1] = ":)";
                                 stackB.push([v[0] - 1, v[1] - 1]);
+                                console.log("диаг. верх-лево")
                             }
                             if (upRight){
-                                arr[v[0] - 1][v[1] + 1] = ":)";
+                                //arr[v[0] - 1][v[1] + 1] = ":)";
                                 stackB.push([v[0] - 1, v[1] + 1]);
+                                console.log("диаг. верх-право")
                             }
 
                             if (bottomLeft){
-                                arr[v[0] + 1][v[1] - 1] = ":)";
-                                stackB.push([v[0] + 1, v[1] - 1]);
+                                //arr[v[0] + 1][v[1] - 1] = ":)";
+                                if (!a.includes([v[0] + 1, v[1] - 1])){
+                                    stackB.push([v[0] + 1, v[1] - 1]);
+                                    console.log("диаг. низ-лево")
+                                } else console.log("уже содержит диаг. низ-лево")
                             }
                             if (bottomRight){
-                                arr[v[0] + 1][v[1] + 1] = ":)";
-                                stackB.push([v[0] + 1, v[1] + 1]);
+                                //arr[v[0] + 1][v[1] + 1] = ":)";
+                                if (!a.includes([v[0] + 1, v[1] + 1])){
+                                    stackB.push([v[0] + 1, v[1] + 1]);
+                                    console.log("диаг. низ-право")
+                                } else console.log("уже содержит диаг. низ-право")
                             }
                             // помечаем как проверенный
                             arr[v[0]][v[1]] = ":)";
                             // удаляем уже пройденный узел
-                            a.splice(i, 0);
+                            a.splice(i, 1);
                         });
-                        stackA = [];
-                        stackA.push(...stackB);
-                        stackB = [];
+                        console.log(`stackB`, stackB)
+                        //stackA = [];
+                        //stackA.push(...stackB);
+                        //stackB = [];
                     }
                     const val =  resultCalculation(tempX, tempY);
 
