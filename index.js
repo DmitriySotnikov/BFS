@@ -20,10 +20,7 @@ readline.on('line', (line) => {
 
     function findLand(arr) {
 
-        let delItem
-
-        let stackA = []; // Два стека для обработки и поиска связанных узлов в двумерном массиве
-        let stackB = [];
+        let stack = [];
 
         let rows = arr.length, // координата - y
             cols = arr[0].length; // координата - x
@@ -48,6 +45,8 @@ readline.on('line', (line) => {
         let tempSquare = 0; // временый результат площади региона
         let tempRation = 0; // временый результат коэффициента плодородной земли региона
 
+        let value
+
         function resultCalculation(arrX, arrY) {
             const valueX = arrX.sort((a,b)=>a-b);
             const valueY = arrY.sort((a,b)=>a-b);
@@ -57,7 +56,7 @@ readline.on('line', (line) => {
             const square = ((valueX[valueX.length-1] - valueX[0])+1) * ((valueY[valueY.length-1] - valueY[0])+1);
             console.log(`square`,square)
 
-            // Коофициент
+            // Эффективность
             const ratio = goodLand / square;
             return {ratio, square, goodLand}
         }
@@ -67,99 +66,86 @@ readline.on('line', (line) => {
                 if (!arr[row][col] || arr[row][col] === ":)") continue;
                 if (arr[row][col] === "1") {
                     console.log(`первый эл`, row, col)
-                    stackB.push([row, col]);
-                    while (stackB.length){
-                        stackB.forEach( (v, i, a) => {
-                            tempX.push(v[0]);
-                            tempY.push(v[1]);
+                    stack.push([row, col]);
+                    while (stack.length){
 
-                            left = v[1] > 0 && arr[v[0]][v[1] - 1] === "1";
-                            right = v[1] < cols-1 && arr[v[0]][v[1] + 1] === "1";
+                        value = stack.pop();
+                        console.log(`pop=`, value)
 
-                            bottom = v[0] < rows-1  && arr[v[0] + 1][v[1]] === "1";
-                            up = v[0] > 0 && arr[v[0] - 1][v[1]] === "1";
+                        tempX.push(value[0]);
+                        tempY.push(value[1]);
 
-                            upLeft = v[0] > 0 && v[1] > 0 && arr[v[0] - 1][v[1] - 1] === "1";
-                            upRight = v[0] > 0 && v[1] < cols-1 && arr[v[0] - 1][v[1] + 1] === "1";
+                        right = value[1] < cols-1 && arr[value[0]][value[1] + 1] === "1";
+                        bottom = value[0] < rows-1  && arr[value[0] + 1][value[1]] === "1";
+                        bottomLeft = value[0] < rows-1 && value[1] > 0 && arr[value[0] + 1][value[1] - 1] === "1";
+                        bottomRight = value[0] < rows-1 && value[1] < cols-1 && arr[value[0] + 1][value[1] + 1] === "1";
 
-                            bottomLeft = v[0] < rows-1 && v[1] > 0 && arr[v[0] + 1][v[1] - 1] === "1";
-                            bottomRight = v[0] < rows-1 && v[1] < cols-1 && arr[v[0] + 1][v[1] + 1] === "1";
 
-                            console.log(`v`, v)
-                            //if (v === ":)") return;
+                        // можно не проверять
+                        left = value[1] > 0 && arr[value[0]][value[1] - 1] === "1";
+                        up = value[0] > 0 && arr[value[0] - 1][value[1]] === "1";
+                        upLeft = value[0] > 0 && value[1] > 0 && arr[value[0] - 1][value[1] - 1] === "1";
+                        upRight = value[0] > 0 && value[1] < cols-1 && arr[value[0] - 1][value[1] + 1] === "1";
 
-                            // узел прервался - выходим
-                            if (!left && !right && !up && !bottom && !upLeft && !upRight && !bottomLeft && !bottomRight){
-                                arr[v[0]][v[1]] = ":)";
-                                delItem = a.splice(i, 1);
-                                console.log(`delItem`,delItem)
-                                console.log(`stackB`,stackB)
-                                return;
-                            }
-                            // поиск дочерних узлов
-                            if (left){
-                                //arr[v[0]][v[1] - 1] = ":)";
-                                if (!a.includes([v[0], v[1] - 1])){
-                                    stackB.push([v[0], v[1] - 1]);
-                                    console.log("лево")
-                                } else console.log("уже содержит лево")
-                            }
-                            if (right){
-                                //arr[v[0]][v[1] + 1] = ":)";
-                                if (!a.includes([v[0], v[1] + 1])){
-                                    stackB.push([v[0], v[1] + 1]);
-                                    console.log("право")
-                                } else console.log("уже содержит право")
-                            }
+                        // узел прервался - пропускаем
+                        if (!left && !right && !up && !bottom && !upLeft && !upRight && !bottomLeft && !bottomRight){
+                            arr[value[0]][value[1]] = ":)";
+                            console.log(`stack`,stack)
+                            continue;
+                        }
 
-                            if (up){
-                                //arr[v[0] - 1][v[1]] = ":)";
-                                stackB.push([v[0] - 1, v[1]]);
-                                console.log("верх")
-                            }
-                            if (bottom){
-                                //arr[v[0] + 1][v[1]] = ":)";
-                                if (!a.includes([v[0] + 1, v[1]])){
-                                    stackB.push([v[0] + 1, v[1]]);
-                                    console.log("низ")
-                                } else console.log("уже содержит низ")
-                            }
+                        // поиск дочерних узлов
+                        if (left){
+                            // можно убрать
+                            arr[value[0]][value[1] - 1] = ":)";
+                            stack.push([value[0], value[1] - 1]);
+                            console.log("лево")
+                        }
+                        if (right){
+                            arr[value[0]][value[1] + 1] = ":)";
+                            stack.push([value[0], value[1] + 1]);
+                            console.log("право")
+                        }
+                        if (up){
+                            // можно убрать
+                            arr[value[0] - 1][value[1]] = ":)";
+                            stack.push([value[0] - 1, value[1]]);
+                            console.log("верх")
+                        }
+                        if (bottom){
+                            arr[value[0] + 1][value[1]] = ":)";
+                            stack.push([value[0] + 1, value[1]]);
+                            console.log("низ")
+                        }
+                        if (upLeft){
+                            //можно убрать
+                            arr[value[0] - 1][value[1] - 1] = ":)";
+                            stack.push([value[0] - 1, value[1] - 1]);
+                            console.log("диаг. верх-лево")
+                        }
+                        if (upRight){
+                            //можно убрать
+                            arr[value[0] - 1][value[1] + 1] = ":)";
+                            stack.push([value[0] - 1, value[1] + 1]);
+                            console.log("диаг. верх-право")
+                        }
 
-                            if (upLeft){
-                                //arr[v[0] - 1][v[1] - 1] = ":)";
-                                stackB.push([v[0] - 1, v[1] - 1]);
-                                console.log("диаг. верх-лево")
-                            }
-                            if (upRight){
-                                //arr[v[0] - 1][v[1] + 1] = ":)";
-                                stackB.push([v[0] - 1, v[1] + 1]);
-                                console.log("диаг. верх-право")
-                            }
+                        if (bottomLeft){
+                            arr[value[0] + 1][value[1] - 1] = ":)";
+                            stack.push([value[0] + 1, value[1] - 1]);
+                            console.log("диаг. низ-лево")
+                        }
+                        if (bottomRight){
+                            arr[value[0] + 1][value[1] + 1] = ":)";
+                            stack.push([value[0] + 1, value[1] + 1]);
+                            console.log("диаг. низ-право")
+                        }
 
-                            if (bottomLeft){
-                                //arr[v[0] + 1][v[1] - 1] = ":)";
-                                if (!a.includes([v[0] + 1, v[1] - 1])){
-                                    stackB.push([v[0] + 1, v[1] - 1]);
-                                    console.log("диаг. низ-лево")
-                                } else console.log("уже содержит диаг. низ-лево")
-                            }
-                            if (bottomRight){
-                                //arr[v[0] + 1][v[1] + 1] = ":)";
-                                if (!a.includes([v[0] + 1, v[1] + 1])){
-                                    stackB.push([v[0] + 1, v[1] + 1]);
-                                    console.log("диаг. низ-право")
-                                } else console.log("уже содержит диаг. низ-право")
-                            }
-                            // помечаем как проверенный
-                            arr[v[0]][v[1]] = ":)";
-                            // удаляем уже пройденный узел
-                            a.splice(i, 1);
-                        });
-                        console.log(`stackB`, stackB)
-                        //stackA = [];
-                        //stackA.push(...stackB);
-                        //stackB = [];
+                        // помечаем как проверенный
+                        arr[value[0]][value[1]] = ":)";
+                        console.log(`stack=`, stack)
                     }
+
                     const val =  resultCalculation(tempX, tempY);
 
                     if (val.square > 1 && val.ratio === tempRation && val.square > tempSquare) {
@@ -174,6 +160,8 @@ readline.on('line', (line) => {
 
                     tempX = [];
                     tempY = [];
+
+                    // Количество участков
                     isBindNodes++
                 }
             }
